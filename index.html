@@ -3,226 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reloj Analógico Minimalista</title>
-    <!-- Incluye una fuente de Google para una estética limpia -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>Reloj Digital Minimalista</title>
+    <!-- Incluye la fuente Roboto Mono de Google Fonts para un estilo digital -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        // Variable para controlar el formato de 12 o 24 horas.
+        let is24HourFormat = true;
+        
+        // Elemento del botón para actualizar su texto.
+        let toggleButton;
+
+        // La siguiente función se encargará de actualizar el reloj y el texto del botón.
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            let ampm = '';
+
+            // Lógica para alternar entre 12h y 24h
+            if (!is24HourFormat) {
+                ampm = hours >= 12 ? ' PM' : ' AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // La hora '0' se convierte en '12'
+            }
+            hours = String(hours).padStart(2, '0');
+
+            // Actualizar la hora
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            document.getElementById('ampm').textContent = ampm;
+
+            // Actualizar la fecha
+            // Usamos toLocaleDateString para obtener el día de la semana y la fecha en español
+            const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
+            const dateStr = now.toLocaleDateString('es-ES', options);
+
+            // Formatear la cadena para que coincida con "miercoles, 20-08-2025"
+            // Reemplazamos la barra diagonal con un guion y capitalizamos el primer caracter del día
+            let formattedDate = dateStr.replace(/\//g, '-');
+            formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+            document.getElementById('date').textContent = formattedDate;
+            
+            // Actualizar el texto del botón para reflejar la próxima acción
+            if (toggleButton) {
+                toggleButton.textContent = `Cambiar a ${is24HourFormat ? '12h' : '24h'}`;
+            }
+        }
+
+        // Se llama a la función updateClock cada segundo
+        // Esto asegura que el reloj se mantenga actualizado.
+        setInterval(updateClock, 1000);
+
+        // Se ejecuta la función al cargar la página y se añade el evento al botón
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleButton = document.getElementById('toggle-format');
+            updateClock();
+            if (toggleButton) {
+                toggleButton.addEventListener('click', () => {
+                    is24HourFormat = !is24HourFormat;
+                    updateClock();
+                });
+            }
+        });
+    </script>
     <style>
-        /* Estilos generales y del cuerpo */
+        /* Estilos generales para el cuerpo de la página */
         body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #121212; /* Fondo muy oscuro y minimalista */
+            color: #ececec; /* Color blanco suave */
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-color: #f0f4f8; /* Color de fondo suave */
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Evita barras de desplazamiento */
+            height: 100vh;
             margin: 0;
-            padding: 20px;
+            overflow: hidden; /* Evitar barras de desplazamiento */
+            position: relative;
         }
 
         /* Contenedor principal del reloj */
         .clock-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px; /* Tamaño máximo para el reloj */
-            aspect-ratio: 1 / 1; /* Mantiene la forma circular */
-            background-color: #ffffff;
-            border: 8px solid #cbd5e1; /* Borde sutil */
-            border-radius: 50%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Estilo para los marcadores de las horas (1-12) */
-        .hour-number {
-            position: absolute;
-            color: #334155;
-            font-size: clamp(0.7rem, 3vw, 1.2rem); /* Tamaño de fuente responsivo */
-            font-weight: 600;
-        }
-
-        /* Estilo para los marcadores de los minutos (pequeños puntos) */
-        .minute-marker {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            text-align: center;
+            /* Efecto de resplandor sutil */
+            text-shadow: 0 0 5px #ececec, 0 0 10px rgba(236, 236, 236, 0.5);
+            padding: 2rem;
+            border-radius: 12px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Estilo para la hora */
+        .time-display {
+            font-size: 15vw; /* Tamaño de fuente adaptable */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
+
+        /* Estilo para los segundos y el separador */
+        .time-display span {
+            display: inline-block;
+        }
+
+        /* Estilo para el separador (:) */
+        .separator {
+            padding: 0 1vw; /* Espacio para el separador */
+        }
         
-        .minute-marker::before {
-            content: '';
-            position: absolute;
-            top: 2%;
-            width: 4px;
-            height: 4px;
-            background-color: #94a3b8;
-            border-radius: 50%;
+        /* Estilo para la fecha */
+        .date-display {
+            font-size: 5vw; /* Tamaño de fuente adaptable */
+            font-weight: 400;
+            margin-top: 2vh;
         }
 
-        /* Marcadores especiales para los minutos que coinciden con las horas (más grandes) */
-        .minute-marker.hour-line::before {
-            width: 8px;
-            height: 8px;
-            background-color: #64748b;
-            border-radius: 50%;
+        /* Estilo para el botón de cambio de formato */
+        .toggle-button {
+            margin-top: 3vh; /* Espacio entre el reloj y el botón */
+            padding: 12px 24px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: clamp(12px, 2vw, 24px); /* Tamaño de fuente responsive y limitado */
+            color: #121212;
+            background-color: #ececec;
+            border: none;
+            border-radius: 30px; /* Borde más redondeado para un look moderno */
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            outline: none;
+        }
+        
+        .toggle-button:hover {
+            background-color: #d1d1d1;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .toggle-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Estilo para las agujas del reloj */
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom; /* Gira desde la base de la aguja */
-            border-radius: 10px;
-            z-index: 10;
+        /* Media queries para adaptar el tamaño de la fuente en dispositivos más pequeños */
+        @media (max-width: 600px) {
+            .time-display {
+                font-size: 20vw;
+            }
+            .date-display {
+                font-size: 7vw;
+            }
         }
-
-        /* Estilo de la aguja de la hora */
-        .hour-hand {
-            width: 8px;
-            height: 25%;
-            background-color: #1e293b;
-            transform: rotate(0deg);
-        }
-
-        /* Estilo de la aguja de los minutos */
-        .minute-hand {
-            width: 6px;
-            height: 35%;
-            background-color: #1e293b;
-            transform: rotate(0deg);
-        }
-
-        /* Estilo de la aguja de los segundos */
-        .second-hand {
-            width: 2px;
-            height: 40%;
-            background-color: #ef4444; /* Color rojo para destacar */
-            transform: rotate(0deg);
-            z-index: 20; /* Asegura que esté encima de las otras agujas */
-        }
-
-        /* Círculo central que cubre el pivote de las agujas */
-        .center-circle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            background-color: #1e293b;
-            border: 4px solid #f0f4f8;
-            border-radius: 50%;
-            z-index: 30;
-        }
-
     </style>
 </head>
 <body>
 
-<div class="clock-container">
-    <div class="center-circle"></div>
-
-    <!-- Generación de marcadores y números de hora con JavaScript -->
-</div>
-
-<script>
-    // Selecciona los elementos del DOM
-    const clockContainer = document.querySelector('.clock-container');
-    const hourHand = document.createElement('div');
-    const minuteHand = document.createElement('div');
-    const secondHand = document.createElement('div');
-
-    hourHand.classList.add('hand', 'hour-hand');
-    minuteHand.classList.add('hand', 'minute-hand');
-    secondHand.classList.add('hand', 'second-hand');
-
-    clockContainer.appendChild(hourHand);
-    clockContainer.appendChild(minuteHand);
-    clockContainer.appendChild(secondHand);
-
-    // Función para crear y posicionar los números de las horas y los marcadores de minutos
-    function createClockElements() {
-        // Genera los 12 números de las horas
-        for (let i = 1; i <= 12; i++) {
-            const hourNumber = document.createElement('div');
-            hourNumber.classList.add('hour-number');
-            hourNumber.textContent = i;
-            
-            // Calcula el ángulo de cada número en grados
-            const angle = (i * 30) - 90; 
-            const angleRad = angle * Math.PI / 180;
-
-            // Define un radio para el círculo de los números. Se ha ajustado a 160.
-            const radius = 160;
-            
-            // Calcula las coordenadas x e y para el número
-            const x = radius * Math.cos(angleRad);
-            const y = radius * Math.sin(angleRad);
-            
-            // Posiciona el número de forma absoluta y luego lo traslada a la posición calculada
-            hourNumber.style.position = 'absolute';
-            hourNumber.style.left = `calc(50% + ${x}px)`;
-            hourNumber.style.top = `calc(50% + ${y}px)`;
-
-            // Centra el número en su punto de rotación
-            hourNumber.style.transform = `translate(-50%, -50%)`;
-            
-            clockContainer.appendChild(hourNumber);
-        }
-
-        // Genera los 60 marcadores de minutos
-        for (let i = 0; i < 60; i++) {
-            const minuteMarker = document.createElement('div');
-            minuteMarker.classList.add('minute-marker');
-            if (i % 5 === 0) { // Marca especial para cada 5 minutos (coincide con las horas)
-                minuteMarker.classList.add('hour-line');
-            }
-            const angle = i * 6; // Calcula el ángulo en grados
-            minuteMarker.style.transform = `rotate(${angle}deg)`;
-            clockContainer.appendChild(minuteMarker);
-        }
-    }
-
-    // Llama a la función para crear los elementos al cargar la página
-    createClockElements();
-    
-    // Función para actualizar las agujas del reloj
-    function updateClock() {
-        // Obtiene la hora actual en la zona horaria de la Ciudad de México
-        const now = new Date();
-        const mexicoTime = now.toLocaleString("en-US", { timeZone: "America/Mexico_City" });
-        const mexicoDate = new Date(mexicoTime);
-
-        const seconds = mexicoDate.getSeconds();
-        const minutes = mexicoDate.getMinutes();
-        const hours = mexicoDate.getHours();
-
-        // Conversión de 24 horas a 12 horas para el reloj analógico
-        const displayHours = hours % 12 || 12;
+    <div class="clock-container">
+        <!-- Contenedor para la hora -->
+        <div id="time" class="time-display">
+            <span id="hours">00</span>
+            <span class="separator">:</span>
+            <span id="minutes">00</span>
+            <span class="separator">:</span>
+            <span id="seconds">00</span>
+            <span id="ampm" class="separator"></span>
+        </div>
+        <!-- Contenedor para la fecha -->
+        <div id="date" class="date-display">
+            00-00-0000
+        </div>
         
-        // Calcula la rotación para cada aguja
-        // La aguja de segundos se mueve 6 grados por segundo (360/60)
-        const secondsDegrees = seconds * 6; 
-        
-        // La aguja de minutos se mueve 6 grados por minuto y un extra por los segundos
-        const minutesDegrees = (minutes * 6) + (seconds * 0.1);
+        <!-- Botón para alternar el formato de hora, ahora más elegante -->
+        <button id="toggle-format" class="toggle-button">Cambiar a 12h</button>
+    </div>
 
-        // La aguja de la hora se mueve 30 grados por hora y un extra por los minutos
-        const hoursDegrees = (displayHours * 30) + (minutes * 0.5) + (seconds * (0.5/60));
-
-        // Aplica las rotaciones a los elementos de las agujas
-        secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
-        minuteHand.style.transform = `rotate(${minutesDegrees}deg)`;
-        hourHand.style.transform = `rotate(${hoursDegrees}deg)`;
-    }
-
-    // Actualiza el reloj cada segundo
-    setInterval(updateClock, 1000);
-
-    // Llama a la función una vez al principio para evitar el retraso inicial
-    updateClock();
-
-</script>
 </body>
 </html>
